@@ -127,6 +127,14 @@ jobs:
         run: |
           $compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
           if (-not (Test-Path $compiler)) { throw '未找到 Inno Setup 6 编译器。' }
+          $languageFile = Join-Path (Split-Path $compiler) 'Languages\ChineseSimplified.isl'
+          if (-not (Test-Path $languageFile)) {
+              # Official translation compatible with Inno Setup 6.5.0+; pin its revision.
+              $languageSource = 'https://raw.githubusercontent.com/jrsoftware/issrc/dfb8c9d5c9926413190ab68923bcd9eecbe448b4/Files/Languages/ChineseSimplified.isl'
+              New-Item (Split-Path $languageFile) -ItemType Directory -Force | Out-Null
+              Write-Host '从 Inno Setup 官方源补齐简体中文语言文件。'
+              Invoke-WebRequest -Uri $languageSource -OutFile $languageFile
+          }
           $outputDir = Join-Path $env:GITHUB_WORKSPACE 'release_files'
           & $compiler "/O$outputDir" "/DMyAppVersion=$env:PACKAGE_VERSION" .\Installer_script\Installer.iss
           if ($LASTEXITCODE -ne 0) { throw '安装程序编译失败。' }
