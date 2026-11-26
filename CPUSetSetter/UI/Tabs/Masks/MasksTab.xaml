@@ -51,10 +51,10 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0" Margin="0,0,5,0"
-                        Content="Create new..."
+                        Content="新建…"
                         Command="{Binding CreateNewMaskCommand}"/>
                 <Button Grid.Column="1" Margin="5,0,0,0"
-                        Content="Remove"
+                        Content="删除"
                         Command="{Binding RemoveMaskCommand}"
                         IsEnabled="{Binding CanRemoveMask}"/>
             </Grid>
@@ -71,9 +71,9 @@
 
     <TextBlock Grid.Row="2">
         <TextBlock.Inlines>
-            <Run Text="This is where you can manage your Masks. A Mask defines which CPU cores a process can run on."/>
-            <Run Text="&#x0a;Once a Mask is created, it can be applied to a process by selecting it in the Processes tab."/>
-            <Run Text="&#x0a;You can also configure a hotkey for a Mask, which allows you to apply it to the current foreground process without tabbing-out."/>
+            <Run Text="在此管理核心掩码。核心掩码用于指定进程可以在哪些 CPU 核心上运行。"/>
+            <Run Text="&#x0a;创建掩码后，可在进程选项卡中选择并应用到进程。"/>
+            <Run Text="&#x0a;还可以为掩码设置快捷键，无需切换窗口即可应用到当前前台进程。"/>
         </TextBlock.Inlines>
     </TextBlock>
 
