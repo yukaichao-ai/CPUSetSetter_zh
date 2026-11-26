@@ -80,7 +80,7 @@ namespace CPUSetSetter.UI.Tabs.Masks
                 else if (newMask.Count != control.innerMask.Count)
                 {
                     // Throw an error when the outer Mask length is incorrect
-                    throw new ArgumentException($"Bound Mask has incorrect length. Was {newMask.Count} but should have been {control.innerMask.Count}");
+                    throw new ArgumentException($"绑定的掩码长度不正确，实际为 {newMask.Count}，预期为 {control.innerMask.Count}");
                 }
                 else
                 {
@@ -151,7 +151,7 @@ namespace CPUSetSetter.UI.Tabs.Masks
         private void UpdateHotkeysDisplay()
         {
             hotkeyTextBox.Text = Hotkeys is null || Hotkeys.Count == 0 ?
-                "<no hotkey>"
+                "<未设置快捷键>"
                 : string.Join("+", Hotkeys);
         }
 
