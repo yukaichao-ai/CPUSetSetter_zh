@@ -25,7 +25,7 @@ namespace CPUSetSetter.Util
         private bool _newVersionAvailable;
 
         [ObservableProperty]
-        private string _versionCheckState = "Version check not ran yet";
+        private string _versionCheckState = "尚未检查版本";
 
         public Version? AppVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version;
 
@@ -50,7 +50,7 @@ namespace CPUSetSetter.Util
             if (AppVersion is not null)
             {
                 if (AppVersion == DevVersion)
-                    VersionCheckState = "Version check disabled (Dev)";
+                    VersionCheckState = "版本检查已禁用（开发版）";
                 else
                     Task.Run(RunUpdateChecker); // Only run the update checker when this app is properly versioned
             }
@@ -66,18 +66,18 @@ namespace CPUSetSetter.Util
             if (!value)
                 return;
 
-            WindowLogger.Write("A new version of CPU Set Setter is available on GitHub!");
+            WindowLogger.Write("GitHub 上有新版 CPU Set Setter！");
 
             if (AppConfig.Instance.ShowUpdatePopup)
             {
                 App.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MessageBoxResult result = MessageBox.Show(
-                        "A new version of CPU Set Setter is available!\n" +
-                        "Would you like to open the Release page now?\n" +
-                        "(Sorry, self-updaters are hard)\n\n" +
-                        "(This popup can be disabled in the Settings tab)",
-                        "New CPU Set Setter update available",
+                        "CPU Set Setter 有新版本！\n" +
+                        "是否立即打开发行页面？\n" +
+                        "（目前不支持自动更新）\n\n" +
+                        "（可在设置选项卡中禁用此提示）",
+                        "CPU Set Setter 有可用更新",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information);
 
@@ -103,29 +103,29 @@ namespace CPUSetSetter.Util
                         if (latestVersion > AppVersion!)
                         {
                             NewVersionAvailable = true;
-                            VersionCheckState = $"A new version is available! ({latestReleaseTag})";
+                            VersionCheckState = $"有新版本可用！ ({latestReleaseTag})";
                             return;
                         }
-                        VersionCheckState = "Currently up-to-date";
+                        VersionCheckState = "当前已是最新版本";
                         nextRetry = TimeSpan.FromHours(24); // No update available. Check again the next day
                     }
                     else
                     {
                         // A response was received, but not in the "vx.x.x" format like expected
-                        VersionCheckState = "Failed to parse latest version";
+                        VersionCheckState = "无法解析最新版本";
                         return;
                     }
                 }
                 catch (HttpRequestException)
                 {
                     // Failed to reach GitHub, assume internet is down and try again soon
-                    VersionCheckState = "Version check failed";
+                    VersionCheckState = "版本检查失败";
                     nextRetry = TimeSpan.FromSeconds(60);
                 }
                 catch (Exception)
                 {
                     // Any other exception (probably NoSuccessResponseException), assume GitHub doesn't want a request for a while
-                    VersionCheckState = "Version check failed";
+                    VersionCheckState = "版本检查失败";
                     nextRetry = TimeSpan.FromHours(24);
                 }
 
