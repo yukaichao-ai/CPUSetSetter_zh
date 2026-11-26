@@ -17,7 +17,7 @@
             <CheckBox IsChecked="{Binding MuteHotkeySound, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Mute hotkey sound"/>
+        <TextBlock Text="静音快捷键提示音"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4">
@@ -25,7 +25,7 @@
             <CheckBox IsChecked="{Binding StartMinimized, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Start minimized in tray"/>
+        <TextBlock Text="启动时最小化到托盘"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4">
@@ -33,7 +33,7 @@
             <CheckBox IsChecked="{Binding DisableWelcomeMessage, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Disable welcome message"/>
+        <TextBlock Text="禁用欢迎提示"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4">
@@ -41,16 +41,16 @@
             <CheckBox IsChecked="{Binding AutoStartEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Start with Windows"/>
+        <TextBlock Text="开机自启动"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4"
-                     ToolTip="Clear the Masks on any running process when closing CPU Set Setter through the tray icon">
+                     ToolTip="通过托盘退出程序时，清除所有运行中进程的掩码">
         <BulletDecorator.Bullet>
             <CheckBox IsChecked="{Binding ClearMasksOnClose, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Clear Masks on close"/>
+        <TextBlock Text="退出时清除掩码"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4">
@@ -58,7 +58,7 @@
             <CheckBox IsChecked="{Binding ShowGameModePopup, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Show warning popup when Windows Game Mode is enabled"/>
+        <TextBlock Text="Windows 游戏模式启用时显示警告"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,0,0,4">
@@ -66,12 +66,12 @@
             <CheckBox IsChecked="{Binding ShowUpdatePopup, Source={x:Static config:AppConfig.Instance}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </BulletDecorator.Bullet>
 
-        <TextBlock Text="Show popup when a new version is available"/>
+        <TextBlock Text="有新版本时显示提示"/>
     </BulletDecorator>
 
     <BulletDecorator Margin="0,2,0,4" Height="24">
         <BulletDecorator.Bullet>
-            <TextBlock Text="Theme:"/>
+            <TextBlock Text="主题："/>
         </BulletDecorator.Bullet>
 
         <ComboBox Margin="5,0,0,0"
@@ -84,7 +84,7 @@
     <GroupBox Margin="0,20,0,0"
               Width="250"
               HorizontalAlignment="Left"
-              Header="About">
+              Header="关于">
         <Grid Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
@@ -93,7 +93,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0">
-                <Run Text="Current version:"/>
+                <Run Text="当前版本："/>
                 <Run Text="{Binding VersionString, Source={x:Static util:VersionChecker.Instance}, Mode=OneWay}"/>
             </TextBlock>
 
@@ -102,7 +102,7 @@
 
             <Button Grid.Row="2"
                     Command="{Binding OpenReleasePageCommand}"
-                    Content="Open Release page"
+                    Content="打开发行页面"
                     Width="150"
                     HorizontalAlignment="Left">
                 <Button.Style>
