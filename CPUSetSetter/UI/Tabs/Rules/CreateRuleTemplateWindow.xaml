@@ -8,7 +8,7 @@
         d:DataContext="{d:DesignInstance Type=local:CreateRuleTemplateWindowViewModel}"
         mc:Ignorable="d"
         FocusManager.FocusedElement="{Binding ElementName=ruleGlobInput}"
-        Title="Create a new Rule Template"
+        Title="新建规则模板"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight">
@@ -21,48 +21,48 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Margin="0,0,0,10">
-            <Run Text="When a new process 'matches' with a Rule Template, a new Program Rule will be created for that process automatically."/>
-            <Run Text="&#x0a;&#x0a;A Rule Template is written like a path with wildcards (* and/or **)."/>
-            <Run Text="&#x0a;* matches any part of a single folder or file name."/>
-            <Run Text="&#x0a;** matches any number of folders, including subfolders. When used at the end, it also matches any file name."/>
-            <Run Text="&#x0a;&#x0a;Examples (green means the process matches):"/>
+            <Run Text="新进程匹配规则模板时，将自动为该进程创建程序规则。"/>
+            <Run Text="&#x0a;&#x0a;规则模板采用带通配符（* 或 **）的路径格式。"/>
+            <Run Text="&#x0a;* 匹配单个文件夹名或文件名的任意部分。"/>
+            <Run Text="&#x0a;** 匹配任意数量的文件夹（包括子文件夹），位于末尾时也匹配任意文件名。"/>
+            <Run Text="&#x0a;&#x0a;示例（绿色表示匹配）："/>
 
             <Run Text="&#x0a;C:\Games\** " FontWeight="Bold"/>
             <Run Text="->"/>
             <Run Text="C:\Games\game.exe" Foreground="Green"/>
-            <Run Text="and"/>
+            <Run Text="以及"/>
             <Run Text="C:\Games\Steam\The Finals\Discovery.exe" Foreground="Green"/>
-            <Run Text="but not"/>
+            <Run Text="但不匹配"/>
             <Run Text="C:\More Games\game.exe" Foreground="Red"/>
 
             <Run Text="&#x0a;C:\Games\* " FontWeight="Bold"/>
             <Run Text="->"/>
             <Run Text="C:\Games\game.exe" Foreground="Green"/>
-            <Run Text="but not"/>
+            <Run Text="但不匹配"/>
             <Run Text="C:\Games\Steam\The Finals\Discovery.exe" Foreground="Red"/>
 
             <Run Text="&#x0a;C:\Games\*\* " FontWeight="Bold"/>
             <Run Text="->"/>
             <Run Text="C:\Games\Outer Wilds\OuterWilds.exe" Foreground="Green"/>
-            <Run Text="but not"/>
+            <Run Text="但不匹配"/>
             <Run Text="C:\Games\A\B\C.exe" Foreground="Red"/>
-            <Run Text="or"/>
+            <Run Text="或"/>
             <Run Text="C:\Games\A.exe" Foreground="Red"/>
 
             <Run Text="&#x0a;**\bf6.exe " FontWeight="Bold"/>
             <Run Text="->"/>
             <Run Text="C:\Games\Battlefield 6\bf6.exe" Foreground="Green"/>
-            <Run Text="and"/>
+            <Run Text="以及"/>
             <Run Text="D:\Battlefield 6\SP\bf6.exe" Foreground="Green"/>
-            <Run Text="but not"/>
+            <Run Text="但不匹配"/>
             <Run Text="C:\Games\bbf6.exe" Foreground="Red"/>
 
             <Run Text="&#x0a;**\*Cheat* " FontWeight="Bold"/>
             <Run Text="->"/>
             <Run Text="C:\Games\BF6\EAAntiCheat.Installer.exe" Foreground="Green"/>
-            <Run Text="(Use with &lt;no mask&gt; to create an exclusion for anti-cheat launchers)"/>
+            <Run Text="（配合无掩码使用，可排除反作弊启动程序）"/>
 
-            <Run Text="&#x0a;&#x0a;When creating an exclusion, don't forget to drag the Rule Template to the top so it takes priority!"/>
+            <Run Text="&#x0a;&#x0a;创建排除规则时，请将模板拖至顶部以获得优先级！"/>
         </TextBlock>
 
         <Grid Grid.Row="1">
@@ -78,14 +78,14 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0"
-                       Text="Rule Template:"
+                       Text="规则模板："
                        VerticalAlignment="Center"/>
             <TextBox x:Name="ruleGlobInput"
                      Grid.Row="0" Grid.Column="1" Margin="7,0,0,0"
                      Text="{Binding RuleGlob, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0"
-                       Text="Core Mask:"
+                       Text="核心掩码："
                        VerticalAlignment="Center"/>
             <ComboBox Grid.Row="2" Grid.Column="1" Margin="7,0,0,0"
                       ItemsSource="{Binding LogicalProcessorMasks, Source={x:Static config:AppConfig.Instance}}"
@@ -99,7 +99,7 @@
         </Grid>
 
         <Button Grid.Row="3" Margin="0,10,0,0"
-                Content="Create"
+                Content="创建"
                 IsEnabled="{Binding CanCreate}"
                 Command="{Binding CreateRuleTemplateCommand}"/>
     </Grid>
