@@ -48,7 +48,7 @@ namespace CPUSetSetter
             }
             catch (UnsupportedCpu ex)
             {
-                MessageBox.Show($"This system's CPU is unfortunately not supported: {ex.Message}", "CPU Set Setter", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"当前系统的 CPU 暂不受支持：{ex.Message}", "CPU Set Setter", MessageBoxButton.OK, MessageBoxImage.Error);
                 ExitApp();
                 return;
             }
@@ -59,7 +59,7 @@ namespace CPUSetSetter
             singleInstanceMutex = new(true, mutexName, out bool isOwned);
             if (!isOwned)
             {
-                MessageBox.Show("Failed to open: App is already running", "CPU Set Setter", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("无法打开：程序已在运行", "CPU Set Setter", MessageBoxButton.OK, MessageBoxImage.Error);
                 ExitApp();
                 return;
             }
@@ -103,7 +103,7 @@ namespace CPUSetSetter
         {
             DispatcherUnhandledException += (_, e) =>
             {
-                MessageBox.Show($"An error occurred: {e.Exception}\n{e.Exception.StackTrace}", "Unhandled error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"发生错误：{e.Exception}\n{e.Exception.StackTrace}", "未处理的错误", MessageBoxButton.OK, MessageBoxImage.Error);
             };
         }
 
