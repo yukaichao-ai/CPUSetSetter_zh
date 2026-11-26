@@ -24,7 +24,7 @@ namespace CPUSetSetter.UI.Tabs.Rules
         private void OpenBrowseDialog()
         {
             OpenFileDialog dialog = new();
-            dialog.Filter = "All Files (*.*)|*.*";
+            dialog.Filter = "所有文件 (*.*)|*.*";
 
             bool? result = dialog.ShowDialog();
             if (result == true)
