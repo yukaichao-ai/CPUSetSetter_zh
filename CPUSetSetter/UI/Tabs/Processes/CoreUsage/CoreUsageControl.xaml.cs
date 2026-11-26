@@ -105,7 +105,7 @@ namespace CPUSetSetter.UI.Tabs.Processes.CoreUsage
             }
             catch (Exception ex)
             {
-                WindowLogger.Write($"Error occurred in CoreUsage loop: {ex}");
+                WindowLogger.Write($"核心占用率采集发生错误：{ex}");
             }
         }
 
