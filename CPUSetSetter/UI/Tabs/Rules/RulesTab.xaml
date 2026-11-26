@@ -42,13 +42,13 @@
 
             <DataGrid.Columns>
                 <!--Path column-->
-                <DataGridTextColumn Header="Program Rules"
+                <DataGridTextColumn Header="程序规则"
                                     Binding="{Binding ProgramPath}"
                                     IsReadOnly="True"
                                     Width="*"/>
 
                 <!--Core Mask column-->
-                <DataGridTemplateColumn Header="Core Mask"
+                <DataGridTemplateColumn Header="核心掩码"
                                         IsReadOnly="True"
                                         Width="120"
                                         SortMemberPath="Mask.Name">
@@ -67,14 +67,14 @@
                 </DataGridTemplateColumn>
 
                 <!--Force column-->
-                <DataGridTemplateColumn Header="Force"
+                <DataGridTemplateColumn Header="强制应用"
                                         CanUserResize="False"
                                         Width="45">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox HorizontalAlignment="Center"
                                       IsChecked="{Binding AutoReapply, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ToolTip="Enable to periodically reapply the Mask if it was changed externally">
+                                      ToolTip="启用后，若掩码被外部修改，将定期重新应用">
                             </CheckBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -174,11 +174,11 @@
             <!--Create Program Rule button-->
             <Button Grid.Column="0" Margin="0,0,10,0"
                     Command="{Binding CreateProgramRuleCommand}"
-                    Content="Create..."/>
+                    Content="新建…"/>
 
             <TextBlock Grid.Column="1" Margin="0,0,5,0"
                        VerticalAlignment="Center"
-                       Text="Search:"/>
+                       Text="搜索："/>
 
             <!--Program Rule search bar-->
             <TextBox Grid.Column="2" Margin="0,0,5,0"
@@ -190,7 +190,7 @@
 
             <TextBlock Grid.Column="4"
                        VerticalAlignment="Center"
-                       Text="Show only Rules deviating from Templates"/>
+                       Text="仅显示与模板不一致的规则"/>
         </Grid>
     </Grid>
 
@@ -215,12 +215,12 @@
 
         <DataGrid.Columns>
             <!--GlobRule column-->
-            <DataGridTextColumn Header="Rule Templates (double click to edit, drag-and-drop to reorder)"
+            <DataGridTextColumn Header="规则模板（双击编辑，拖动排序）"
                                 Width="*"
                                 Binding="{Binding RuleGlob}"/>
 
             <!--Core Mask column-->
-            <DataGridTemplateColumn Header="Core Mask"
+            <DataGridTemplateColumn Header="核心掩码"
                                     Width="120"
                                     IsReadOnly="True"
                                     SortMemberPath="Mask.DisplayName">
@@ -279,7 +279,7 @@
                                     BorderThickness="0.7"
                                     Command="{Binding DataContext.RuleTemplateRemoveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     CommandParameter="{Binding}"
-                                    ToolTip="Remove this Template">
+                                    ToolTip="删除此模板">
                                 <Image Source="{StaticResource RemoveImageSource}"/>
                             </Button>
                         </Grid>
@@ -297,15 +297,15 @@
 
         <Button Grid.Column="0" Margin="0,0,10,0"
                 Command="{Binding CreateRuleTemplateCommand}"
-                Content="Create..."/>
+                Content="新建…"/>
 
         <TextBlock Grid.Column="1">
             <TextBlock.Inlines>
-                <Run Text="A Rule Template will create a new Program Rule for any matching process that doesn't have a Program Rules yet. Click"/>
-                <Run Text="Create..." FontWeight="Bold"/>
-                <Run Text="to see examples."/>
-                <Run Text="&#x0a;The priority goes top to bottom," FontWeight="Bold"/>
-                <Run Text="meaning the first Template to 'match' a new process will be the one to create a Program Rule for it."/>
+                <Run Text="规则模板会为尚无程序规则的匹配进程自动创建规则。点击"/>
+                <Run Text="新建…" FontWeight="Bold"/>
+                <Run Text="查看示例。"/>
+                <Run Text="&#x0a;优先级从上到下，" FontWeight="Bold"/>
+                <Run Text="即首个匹配新进程的模板将用于创建程序规则。"/>
             </TextBlock.Inlines>
         </TextBlock>
     </Grid>
