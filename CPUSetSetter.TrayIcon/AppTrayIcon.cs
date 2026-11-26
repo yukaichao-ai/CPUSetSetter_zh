@@ -13,8 +13,8 @@ namespace CPUSetSetter.TrayIcon
         public AppTrayIcon(Stream iconStream)
         {
             ContextMenuStrip trayMenu = new();
-            trayMenu.Items.Add("Open", null, (_, _) => OpenClicked?.Invoke(this, new()));
-            trayMenu.Items.Add("Close", null, (_, _) => CloseClicked?.Invoke(this, new()));
+            trayMenu.Items.Add("打开", null, (_, _) => OpenClicked?.Invoke(this, new()));
+            trayMenu.Items.Add("退出", null, (_, _) => CloseClicked?.Invoke(this, new()));
             _trayIcon = new()
             {
                 Icon = new Icon(iconStream),
