@@ -77,7 +77,7 @@
         </ItemsControl>
         
         <!--Mask Type buttons-->
-        <StackPanel Grid.Row="1" Margin="0,5,0,0" ToolTip="The method of how this Mask is applied to a process.&#x0a;CPU Set is often more stable and works with most anti-cheats.&#x0a;Affinity is a stricter rule but is blocked by most anti-cheats.&#x0a;&#x0a;It's recommended to try a CPU Set on a program first, and try Affinity if it doesn't work well.">
+        <StackPanel Grid.Row="1" Margin="0,5,0,0" ToolTip="掩码应用到进程的方式。&#x0a;CPU 集通常更稳定，兼容大多数反作弊程序。&#x0a;处理器亲和性限制更严格，但可能被反作弊程序阻止。&#x0a;&#x0a;建议优先使用 CPU 集，效果不佳时再尝试亲和性。">
             <StackPanel.Style>
                 <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Visible"/>
@@ -95,15 +95,15 @@
                 </Style>
             </StackPanel.Style>
             
-            <TextBlock Text="Mask type:"/>
-            <RadioButton Content="CPU Set (Recommended)"
+            <TextBlock Text="掩码类型："/>
+            <RadioButton Content="CPU 集（推荐）"
                          GroupName="MaskMode"
                          IsChecked="{Binding MaskType,
                                              ElementName=root,
                                              Converter={StaticResource EnumToBoolConverter},
                                              ConverterParameter={x:Static config:MaskApplyType.CPUSet},
                                              Mode=TwoWay}"/>
-            <RadioButton Content="Affinity"
+            <RadioButton Content="处理器亲和性"
                          GroupName="MaskMode"
                          IsChecked="{Binding MaskType,
                                              ElementName=root,
@@ -122,7 +122,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0"
-                       Text="Hotkey:"
+                       Text="快捷键："
                        VerticalAlignment="Center"/>
             <TextBox x:Name="hotkeyTextBox"
                      Grid.Column="1" Margin="7,0,10,0"
@@ -130,7 +130,7 @@
                      GotKeyboardFocus="HotkeyInput_GotFocus"
                      LostKeyboardFocus="HotkeyInput_LostFocus"/>
             <Button Grid.Column="2"
-                    Content="Clear"
+                    Content="清除"
                     Click="ClearHotkeys_Click"/>
         </Grid>
     </Grid>
