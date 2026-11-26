@@ -127,7 +127,12 @@ jobs:
         run: |
           $compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
           if (-not (Test-Path $compiler)) { throw '未找到 Inno Setup 6 编译器。' }
-          & $compiler '/O.\release_files' "/DMyAppVersion=$env:PACKAGE_VERSION" .\Installer_script\Installer.iss
+          $outputDir = Join-Path $env:GITHUB_WORKSPACE 'release_files'
+          & $compiler "/O$outputDir" "/DMyAppVersion=$env:PACKAGE_VERSION" .\Installer_script\Installer.iss
+          if ($LASTEXITCODE -ne 0) { throw '安装程序编译失败。' }
+          if (-not (Test-Path (Join-Path $outputDir 'CPUSetSetter_Installer.exe'))) {
+              throw '安装程序未生成到发行目录。'
+          }
 
       - name: 生成 SHA-256 校验文件
         run: |

@@ -36,10 +36,10 @@ namespace CPUSetSetter.Util
                 if (AppVersion is not null)
                 {
                     if (AppVersion == DevVersion)
-                        return "Dev";
+                        return "开发版";
                     return $"v{AppVersion}";
                 }
-                return "unknown";
+                return "未知";
             }
         }
 
@@ -58,7 +58,7 @@ namespace CPUSetSetter.Util
 
         public static void OpenLatestReleasePage()
         {
-            Process.Start(new ProcessStartInfo { FileName = "https://github.com/SimonvBez/CPUSetSetter/releases/latest", UseShellExecute = true });
+            Process.Start(new ProcessStartInfo { FileName = "https://github.com/yukaichao-ai/CPUSetSetter_zh/releases/latest", UseShellExecute = true });
         }
 
         partial void OnNewVersionAvailableChanged(bool value)
@@ -66,14 +66,14 @@ namespace CPUSetSetter.Util
             if (!value)
                 return;
 
-            WindowLogger.Write("GitHub 上有新版 CPU Set Setter！");
+            WindowLogger.Write("GitHub 上有新版 CPU Set Setter 中文版！");
 
             if (AppConfig.Instance.ShowUpdatePopup)
             {
                 App.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MessageBoxResult result = MessageBox.Show(
-                        "CPU Set Setter 有新版本！\n" +
+                        "CPU Set Setter 中文版有新版本！\n" +
                         "是否立即打开发行页面？\n" +
                         "（目前不支持自动更新）\n\n" +
                         "（可在设置选项卡中禁用此提示）",
@@ -141,7 +141,7 @@ namespace CPUSetSetter.Util
             client.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue("CPUSetSetterUpdateChecker", "1.0"));
 
-            string url = "https://api.github.com/repos/SimonvBez/CPUSetSetter/releases/latest";
+            string url = "https://api.github.com/repos/yukaichao-ai/CPUSetSetter_zh/releases/latest";
 
             var response = await client.GetAsync(url);
             try
@@ -163,7 +163,7 @@ namespace CPUSetSetter.Util
                 return tagElement.GetString() ?? throw new NullReferenceException();
             }
 
-            throw new KeyNotFoundException("tag_name not found in the API response.");
+            throw new KeyNotFoundException("版本接口返回的数据中缺少 tag_name 字段。");
         }
 
         private class NoSuccessResponseException : Exception { }
