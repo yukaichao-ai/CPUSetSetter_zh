@@ -1,34 +1,28 @@
 name: Build Preview
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       branch_name:
-        description: "Branch to build"
+        description: "要构建的分支、标签或提交 SHA"
         required: true
         default: "main"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number || inputs.branch_name || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch_name }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "9.0.x"
-
-      - name: Publish
-        run: dotnet publish CPUSetSetter/CPUSetSetter.csproj -c Release /p:DebugType=None /p:DebugSymbols=false /p:PublishSingleFile=true /p:PublishTrimmed=false /p:PublishReadyToRun=true /p:SelfContained=false -o publish/CPUSetSetter
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: CPUSetSetter-preview
-          path: publish/CPUSetSetter
-          retention-days: 3
+    uses: ./.github/workflows/build_windows.yml
+    with:
+      ref: ${{ inputs.branch_name || github.sha }}
+      artifact_name: CPUSetSetter-zh-preview

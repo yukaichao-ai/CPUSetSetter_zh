@@ -1,82 +1,75 @@
 name: Build and Release
 
-permissions:
-  contents: write
-
 on:
-  # push:
-  #   tags:
-  #     - "v*"
-
+  push:
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Git tag to release (e.g., v1.2.3)
+        description: "要发布的已有标签，例如 v1.2.3 或 v1.2.3.1"
         required: true
+        type: string
       release_description:
-        description: Release notes/description
-        required: true
+        description: "发行说明（可留空以自动生成）"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: windows-latest
-
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: 验证发布标签
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?)$ ]]; then
+            echo '::error::发布标签必须为 v1.2.3 或 v1.2.3.4 形式。'
+            exit 1
+          fi
+          printf 'version=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          printf 'tag=%s\n' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+  build:
+    needs: prepare
+    uses: ./.github/workflows/build_windows.yml
+    with:
+      ref: refs/tags/${{ needs.prepare.outputs.tag }}
+      version: ${{ needs.prepare.outputs.version }}
+      build_installer: true
+      artifact_name: CPUSetSetter-zh-release
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: 下载已验证的构建产物
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: "10.0.x"
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: release_files
 
-      - name: Set version variable
-        run: |
-          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
-              $tag = '${{ github.event.inputs.release_tag }}'
-              $desc = '${{ github.event.inputs.release_description }}'
-          } else {
-              $tag = $env:GITHUB_REF_NAME
-              $desc = "Release $tag"
-          }
-          $version = $tag.TrimStart('v')
-          echo "VERSION=$version" >> $env:GITHUB_ENV
-          echo "RELEASE_TAG=$tag" >> $env:GITHUB_ENV
-          echo "RELEASE_DESC=$desc" >> $env:GITHUB_ENV
-        shell: pwsh
-
-      - name: Publish normal
-        run: dotnet publish CPUSetSetter/CPUSetSetter.csproj -c Release /p:DebugType=None /p:DebugSymbols=false /p:FileVersion=${{ env.VERSION }} /p:Version=${{ env.VERSION }} /p:PublishSingleFile=true /p:SelfContained=false -o publish/CPUSetSetter
-
-      - name: Publish self-contained
-        run: dotnet publish CPUSetSetter/CPUSetSetter.csproj -c Release /p:DebugType=None /p:DebugSymbols=false /p:FileVersion=${{ env.VERSION }} /p:Version=${{ env.VERSION }} /p:PublishSingleFile=true /p:SelfContained=true -o publish/CPUSetSetter_net10_included
-
-      - name: Include licenses
-        run: |
-          dotnet tool install --global nuget-license
-          nuget-license -i .\CPUSetSetter\CPUSetSetter.csproj -t -d .\third-party-licenses
-          Copy-Item -Path .\third-party-licenses -Destination .\publish\CPUSetSetter -Recurse
-          Copy-Item -Path .\third-party-licenses -Destination .\publish\CPUSetSetter_net10_included -Recurse
-          Copy-Item -Path .\LICENSE -Destination .\publish\CPUSetSetter\LICENSE.txt
-          Copy-Item -Path .\LICENSE -Destination .\publish\CPUSetSetter_net10_included\LICENSE.txt
-
-      - name: Build installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /O".\release_files" /DMyAppVersion=${{ env.VERSION }} .\Installer_script\Installer.iss
-
-      - name: Compress Release files
-        run: |
-          Compress-Archive -Path .\publish\CPUSetSetter -DestinationPath .\release_files\CPUSetSetter.zip
-          Compress-Archive -Path .\publish\CPUSetSetter_net10_included -DestinationPath .\release_files\CPUSetSetter_net10_included.zip
-
-      - name: Show Release file hashes
-        run: Get-FileHash .\release_files\* | Format-List Algorithm, Path, Hash
-
-      - name: Create Release
+      - name: 创建 GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          body: ${{ env.RELEASE_DESC }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          target_commitish: ${{ needs.build.outputs.commit_sha }}
+          body: ${{ inputs.release_description }}
+          generate_release_notes: ${{ !inputs.release_description }}
+          fail_on_unmatched_files: true
           files: release_files/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

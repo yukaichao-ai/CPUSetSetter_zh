@@ -1,0 +1,146 @@
+name: Build Windows Packages
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "要构建的确切提交、标签或分支"
+        required: true
+        type: string
+      artifact_name:
+        description: "构建产物名称前缀（自动附加提交 SHA）"
+        default: CPUSetSetter-zh-windows-x64
+        type: string
+      version:
+        description: "发布版本号；预览构建留空"
+        default: ""
+        type: string
+      build_installer:
+        description: "是否同时生成安装程序（需要 version）"
+        default: false
+        type: boolean
+    outputs:
+      commit_sha:
+        description: "实际构建的提交 SHA"
+        value: ${{ jobs.build.outputs.commit_sha }}
+      artifact_id:
+        description: "上传的构建产物 ID"
+        value: ${{ jobs.build.outputs.artifact_id }}
+      artifact_name:
+        description: "上传的构建产物名称"
+        value: ${{ jobs.build.outputs.artifact_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    outputs:
+      commit_sha: ${{ steps.metadata.outputs.commit_sha }}
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      artifact_name: ${{ steps.metadata.outputs.artifact_name }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+    steps:
+      - name: 检出指定源码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: 记录提交与验证版本
+        id: metadata
+        env:
+          PACKAGE_PREFIX: ${{ inputs.artifact_name }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          BUILD_INSTALLER: ${{ inputs.build_installer }}
+        run: |
+          if ($env:PACKAGE_VERSION -and $env:PACKAGE_VERSION -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?$') {
+              throw '版本号必须为 x.y.z 或 x.y.z.n。'
+          }
+          if ($env:BUILD_INSTALLER -eq 'true' -and -not $env:PACKAGE_VERSION) {
+              throw '生成安装程序时必须指定版本号。'
+          }
+          $sha = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { throw '无法读取提交 SHA。' }
+          "commit_sha=$sha" >> $env:GITHUB_OUTPUT
+          "artifact_name=$($env:PACKAGE_PREFIX)-$($sha.Substring(0, 7))" >> $env:GITHUB_OUTPUT
+          "### Windows x64 构建`n`n源码提交：``$sha```n`n- 普通版需要安装 .NET 10 Desktop Runtime。`n- 内置运行时版无需另行安装 .NET。" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: 安装 .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: 构建普通版
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
+        run: |
+          $versionArgs = @()
+          if ($env:PACKAGE_VERSION) {
+              $versionArgs = @("/p:Version=$env:PACKAGE_VERSION", "/p:FileVersion=$env:PACKAGE_VERSION")
+          }
+          dotnet publish CPUSetSetter/CPUSetSetter.csproj -c Release -r win-x64 --self-contained false /p:DebugType=None /p:DebugSymbols=false /p:PublishSingleFile=true /p:PublishTrimmed=false /p:PublishReadyToRun=true -o publish/CPUSetSetter @versionArgs
+
+      - name: 构建内置 .NET 10 版
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
+        run: |
+          $versionArgs = @()
+          if ($env:PACKAGE_VERSION) {
+              $versionArgs = @("/p:Version=$env:PACKAGE_VERSION", "/p:FileVersion=$env:PACKAGE_VERSION")
+          }
+          dotnet publish CPUSetSetter/CPUSetSetter.csproj -c Release -r win-x64 --self-contained true /p:DebugType=None /p:DebugSymbols=false /p:PublishSingleFile=true /p:PublishTrimmed=false /p:PublishReadyToRun=true -o publish/CPUSetSetter_net10_included @versionArgs
+
+      - name: 安装许可证收集工具
+        run: dotnet tool install --tool-path ./.tools --allow-roll-forward nuget-license
+
+      - name: 收集并附带许可证
+        run: |
+          & ./.tools/nuget-license.exe -i ./CPUSetSetter/CPUSetSetter.csproj -t -d ./third-party-licenses
+          if ($LASTEXITCODE -ne 0) { throw '第三方许可证收集失败。' }
+          foreach ($destination in @('publish/CPUSetSetter', 'publish/CPUSetSetter_net10_included')) {
+              Copy-Item third-party-licenses -Destination $destination -Recurse
+              Copy-Item LICENSE -Destination "$destination/LICENSE.txt"
+          }
+
+      - name: 打包 ZIP 并记录源码版本
+        env:
+          SOURCE_SHA: ${{ steps.metadata.outputs.commit_sha }}
+        run: |
+          New-Item release_files -ItemType Directory -Force | Out-Null
+          Compress-Archive -Path ./publish/CPUSetSetter -DestinationPath ./release_files/CPUSetSetter_zh_win-x64.zip
+          Compress-Archive -Path ./publish/CPUSetSetter_net10_included -DestinationPath ./release_files/CPUSetSetter_zh_win-x64_net10_included.zip
+          "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/commit/$env:SOURCE_SHA" | Set-Content ./release_files/SOURCE.txt -Encoding utf8
+
+      - name: 构建安装程序
+        if: inputs.build_installer
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
+        run: |
+          $compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $compiler)) { throw '未找到 Inno Setup 6 编译器。' }
+          & $compiler '/O.\release_files' "/DMyAppVersion=$env:PACKAGE_VERSION" .\Installer_script\Installer.iss
+
+      - name: 生成 SHA-256 校验文件
+        run: |
+          Get-ChildItem ./release_files -File | Where-Object Name -ne 'SHA256SUMS.txt' | Sort-Object Name | ForEach-Object {
+              $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              "$hash  $($_.Name)"
+          } | Set-Content ./release_files/SHA256SUMS.txt -Encoding ascii
+
+      - name: 上传 Windows 构建产物
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}
+          path: release_files/*
+          if-no-files-found: error
+          retention-days: 14

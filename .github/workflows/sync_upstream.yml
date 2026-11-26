@@ -1,0 +1,121 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天北京时间 04:17（UTC 20:17），避开整点高峰。
+    - cron: "17 20 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/sync_upstream.yml
+      - .github/scripts/sync_upstream.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'yukaichao-ai/CPUSetSetter_zh'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      should_build: ${{ steps.sync.outputs.should_build }}
+      candidate_sha: ${{ steps.sync.outputs.candidate_sha }}
+      pr_number: ${{ steps.sync.outputs.pr_number }}
+      tracking_issue_number: ${{ steps.sync.outputs.tracking_issue_number }}
+    steps:
+      - name: 检出本仓库的同步逻辑
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: 检查并准备上游合并
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/sync_upstream.py
+
+  build:
+    needs: prepare
+    if: github.repository == 'yukaichao-ai/CPUSetSetter_zh' && needs.prepare.outputs.should_build == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build_windows.yml
+    with:
+      ref: ${{ needs.prepare.outputs.candidate_sha }}
+      artifact_name: CPUSetSetter-zh-upstream
+
+  integrate:
+    needs: [prepare, build]
+    if: github.repository == 'yukaichao-ai/CPUSetSetter_zh' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: 检出已信任的主分支
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: 校验构建提交并合入本仓库
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ needs.prepare.outputs.candidate_sha }}
+          BUILT_SHA: ${{ needs.build.outputs.commit_sha }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          ISSUE_NUMBER: ${{ needs.prepare.outputs.tracking_issue_number }}
+          ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          repository='yukaichao-ai/CPUSetSetter_zh'
+          destination='https://github.com/yukaichao-ai/CPUSetSetter_zh.git'
+          test "$GITHUB_REPOSITORY" = "$repository"
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          test "$CANDIDATE_SHA" = "$BUILT_SHA"
+          test -n "$ARTIFACT_ID"
+          git remote set-url origin "$destination"
+          git fetch --no-tags origin '+refs/heads/main:refs/remotes/origin/main' '+refs/heads/automation/sync-upstream:refs/remotes/origin/automation/sync-upstream'
+          current_candidate=$(git rev-parse refs/remotes/origin/automation/sync-upstream)
+          test "$current_candidate" = "$BUILT_SHA"
+          current_main=$(git rev-parse refs/remotes/origin/main)
+          if ! git merge-base --is-ancestor "$current_main" "$BUILT_SHA"; then
+            echo '::error::main 已有候选提交未包含的新改动；保留同步 PR，下次检查重新合并和构建。'
+            printf '### 暂未合入\n\nmain 在构建期间发生更新。同步 PR #%s 保留，下次检查会重新合并与构建。\n' "$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          # Never execute candidate files in this job. A normal push is the final race check.
+          git push "$destination" "$BUILT_SHA:refs/heads/main"
+          if [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
+            if ! gh api --method PATCH "repos/$repository/issues/$ISSUE_NUMBER" -f state=closed --silent; then
+              echo '::warning::上游更新已合入，但旧跟踪 Issue 未能自动关闭；请检查该 Issue。'
+            fi
+          fi
+          # GitHub closes the PR as merged when its head becomes an ancestor of main.
+          printf '### 上游更新已合入中文版\n\n已构建提交：`%s`\n\n[同步 PR #%s](https://github.com/%s/pull/%s)\n\n[下载构建产物](https://github.com/%s/actions/runs/%s/artifacts/%s)\n' "$BUILT_SHA" "$PR_NUMBER" "$repository" "$PR_NUMBER" "$repository" "$GITHUB_RUN_ID" "$ARTIFACT_ID" >> "$GITHUB_STEP_SUMMARY"
+
+  build_failure:
+    needs: [prepare, build]
+    if: always() && github.repository == 'yukaichao-ai/CPUSetSetter_zh' && needs.prepare.outputs.should_build == 'true' && needs.build.result != 'success'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: 记录未合入原因
+        env:
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          printf '### 上游更新未合入\n\n构建结果：%s。main 保持原样，同步 PR #%s 保留供处理。\n' "$BUILD_RESULT" "$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"

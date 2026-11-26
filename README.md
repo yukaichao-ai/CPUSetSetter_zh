@@ -1,5 +1,8 @@
 # CPU Set Setter 中文版
 
+[![自动构建](https://github.com/yukaichao-ai/CPUSetSetter_zh/actions/workflows/build_preview_from_branch.yml/badge.svg)](https://github.com/yukaichao-ai/CPUSetSetter_zh/actions/workflows/build_preview_from_branch.yml)
+[![上游同步](https://github.com/yukaichao-ai/CPUSetSetter_zh/actions/workflows/sync_upstream.yml/badge.svg)](https://github.com/yukaichao-ai/CPUSetSetter_zh/actions/workflows/sync_upstream.yml)
+
 <p align=center>
     <img height="75" src="Images/Logo.png">
 </p>
@@ -41,6 +44,16 @@ Windows 会自动调度任务，但调度结果不一定最优。CPU Set Setter 
 - [Intel 处理器配置教程](docs/setup/Intel.md)
 
 [本仓库发行页面](https://github.com/yukaichao-ai/CPUSetSetter_zh/releases)
+
+## 自动构建与上游同步
+
+- 每次向 `main` 提交代码或创建指向 `main` 的 PR，自动构建 Windows x64 版本。可在 [Build Preview](https://github.com/yukaichao-ai/CPUSetSetter_zh/actions/workflows/build_preview_from_branch.yml) 的成功运行页面下载普通版和内置 .NET 10 运行时版，预览包保留 14 天。
+- 每天北京时间 **04:17** 检查 `SimonvBez/CPUSetSetter:main`。上游更新先合并到本仓库的同步分支，创建本仓库 PR，并构建该确切提交；没有冲突且构建通过后，自动合入本仓库 `main`。
+- 同步方向仅为 **上游 → 本项目**。所有推送、PR 和问题记录都在 `yukaichao-ai/CPUSetSetter_zh`；不会回推上游。合并保留已有中文化，新增英文文本仍需后续翻译。
+- 冲突、构建失败或上游工作流修改会暂停自动合入，保留 PR 或生成本仓库跟踪 Issue。
+- 推送 `v1.2.3` / `v1.2.3.1` 形式的标签时自动打包并发布 Release；定时同步不会复制或推送上游标签。
+
+手动运行、下载产物及处理冲突的方法见 [自动化维护说明](docs/AUTOMATION.md)。
 
 ## 界面截图
 
