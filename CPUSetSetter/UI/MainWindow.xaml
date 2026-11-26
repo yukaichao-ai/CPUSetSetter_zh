@@ -18,7 +18,7 @@
         <!--Processes Tab-->
         <TabItem>
             <TabItem.Header>
-                <TextBlock Text="Processes"/>
+                <TextBlock Text="进程"/>
             </TabItem.Header>
 
             <proc:ProcessesTab/>
@@ -27,7 +27,7 @@
         <!--Masks Tab-->
         <TabItem>
             <TabItem.Header>
-                <TextBlock Text="Masks"/>
+                <TextBlock Text="核心掩码"/>
             </TabItem.Header>
 
             <masks:MasksTab/>
@@ -36,7 +36,7 @@
         <!--Rules-->
         <TabItem>
             <TabItem.Header>
-                <TextBlock Text="Rules"/>
+                <TextBlock Text="规则"/>
             </TabItem.Header>
 
             <rules:RulesTab/>
@@ -45,7 +45,7 @@
         <!--Settings-->
         <TabItem>
             <TabItem.Header>
-                <TextBlock Text="Settings"/>
+                <TextBlock Text="设置"/>
             </TabItem.Header>
 
             <settings:SettingsTab/>
