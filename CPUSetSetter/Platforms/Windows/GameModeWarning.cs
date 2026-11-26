@@ -18,20 +18,20 @@ namespace CPUSetSetter.Platforms
             if (!GameModeEnabled())
                 return;
 
-            WindowLogger.Write("WARNING: Windows Game Mode is enabled. This might have a severe negative impact on gaming performance/stability " +
-                "when also using CPU Set Setter on games.");
+            WindowLogger.Write("警告：Windows 游戏模式已启用，可能严重影响游戏性能和稳定性，" +
+                "尤其是在同时使用 CPU Set Setter 时。");
 
             if (AppConfig.Instance.ShowGameModePopup)
             {
                 App.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MessageBoxResult result = MessageBox.Show(
-                        "Windows Game Mode is currently enabled.\n" +
-                        "On AMD CPUs, Game Mode is known to conflict with CPU Set Setter, leading to lower FPS and game crashes.\n" +
-                        "I am not sure if Intel CPUs are affected too. So if you have one, please share your findings with me on GitHub!\n\n" +
-                        "Would you like to open the Game Mode Settings page?\n\n" +
-                        "(This popup can be disabled in the Settings tab)",
-                        "CPU Set Setter: Windows Game Mode warning",
+                        "Windows 游戏模式当前已启用。\n" +
+                        "在 AMD CPU 上，游戏模式已知可能与 CPU Set Setter 冲突，导致帧率下降或游戏崩溃。\n" +
+                        "Intel CPU 是否受影响尚不明确，欢迎在 GitHub 上反馈测试结果！\n\n" +
+                        "是否打开游戏模式设置页面？\n\n" +
+                        "（可在设置选项卡中禁用此提示）",
+                        "CPU Set Setter：Windows 游戏模式警告",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Warning);
 
