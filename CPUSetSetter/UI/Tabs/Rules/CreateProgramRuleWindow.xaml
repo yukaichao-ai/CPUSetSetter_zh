@@ -8,7 +8,7 @@
         d:DataContext="{d:DesignInstance Type=local:CreateProgramRuleWindowViewModel}"
         mc:Ignorable="d"
         FocusManager.FocusedElement="{Binding ElementName=rulePathInput}"
-        Title="Create a new Program Rule"
+        Title="新建程序规则"
         WindowStartupLocation="CenterOwner"
         MinHeight="250"
         MaxHeight="250"
@@ -24,10 +24,10 @@
 
         <TextBlock Grid.Row="0"
                    TextWrapping="Wrap">
-            <Run Text="TIP: While Program Rules can be created like this, the easiest way to create new Program Rules"/>
-            <Run Text="is by selecting a Core Mask for a process in the Processes tab."/>
-            <Run Text="&#x0a;In the Masks tab you can even set up Hotkeys for your Core Masks. Just press your hotkey,"/>
-            <Run Text="and that Core Mask will be applied to your current foreground program. Hotkeys also work in (most) fullscreen games."/>
+            <Run Text="提示：除了在此创建程序规则，更简便的方法是"/>
+            <Run Text="在进程选项卡中为进程选择核心掩码。"/>
+            <Run Text="&#x0a;在核心掩码选项卡中可设置快捷键。按下快捷键后，"/>
+            <Run Text="掩码将应用到当前前台程序。快捷键也适用于大多数全屏游戏。"/>
         </TextBlock>
 
         <Grid Grid.Row="1">
@@ -44,17 +44,17 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0"
-                       Text="Program Path:"
+                       Text="程序路径："
                        VerticalAlignment="Center"/>
             <TextBox x:Name="rulePathInput"
                      Grid.Row="0" Grid.Column="1" Margin="7,0,0,0"
                      Text="{Binding RulePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Button Grid.Row="0" Grid.Column="2" Margin="7,0,0,0"
-                    Content="Browse..."
+                    Content="浏览…"
                     Command="{Binding OpenBrowseDialogCommand}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0"
-                       Text="Core Mask:"
+                       Text="核心掩码："
                        VerticalAlignment="Center"/>
             <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="7,0,0,0"
                       ItemsSource="{Binding LogicalProcessorMasks, Source={x:Static config:AppConfig.Instance}}"
@@ -68,7 +68,7 @@
         </Grid>
 
         <Button Grid.Row="3" Margin="0,10,0,0"
-                Content="Create"
+                Content="创建"
                 IsEnabled="{Binding CanCreate}"
                 Command="{Binding CreateProgramRuleCommand}"/>
 
